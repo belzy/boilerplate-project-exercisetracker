@@ -1,5 +1,6 @@
 'use strict';
 
+const apiRouter = require('./api/index.js');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -15,6 +16,7 @@ const PORT = 8080 || process.env.PORT;
 server.use(cors());
 server.use(bodyParser.urlencoded({ extended: false }));
 server.use(bodyParser.json());
+server.use(apiRouter);
 
 server.use('/', express.static(path.join(__dirname, './client/build')));
 server.get('/', (req, res, next) => {
