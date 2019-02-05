@@ -1,31 +1,33 @@
-const express = require('express')
-const app = express()
-const bodyParser = require('body-parser')
+'use strict';
 
+const path = require('path');
+const bodyParser = require('body-parser');
 const cors = require('cors');
-
-const mongoose = require('mongoose')
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
-
-app.use(cors())
-
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(bodyParser.json())
+const express = require('express')
+const server = express()
+const PORT = 8080 || process.env.PORT;
 
 
-app.use(express.static('public'))
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/views/index.html')
+// const mongoose = require('mongoose')
+// mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
+
+
+server.use(cors());
+server.use(bodyParser.urlencoded({ extended: false }));
+server.use(bodyParser.json());
+
+server.use('/', express.static(path.join(__dirname, './client/build')));
+server.get('/', (req, res, next) => {
+  res.sendFile(path.join(__dirname, './client/build/index.html'));
 });
 
-
 // Not found middleware
-app.use((req, res, next) => {
+server.use((req, res, next) => {
   return next({status: 404, message: 'not found'})
 })
 
 // Error Handling middleware
-app.use((err, req, res, next) => {
+server.use((err, req, res, next) => {
   let errCode, errMessage
 
   if (err.errors) {
@@ -43,6 +45,6 @@ app.use((err, req, res, next) => {
     .send(errMessage)
 })
 
-const listener = app.listen(process.env.PORT || 3000, () => {
-  console.log('Your app is listening on port ' + listener.address().port)
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}...`);
 })
