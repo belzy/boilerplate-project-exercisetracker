@@ -8,89 +8,24 @@ import { Column, Table, SelectionModes } from '@blueprintjs/table';
 import styled from 'styled-components';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/table/lib/css/table.css';
+import axios from 'axios';
+import UserControls from './UserControls/index';
 
 
+const AddExerciseButton = (props) => {
 
+  const Container = styled.div`
 
+    border: 1px solid black;
+    position: relative;
+    width: 20px;
 
-
-const UserControls = (props) => {
-
-  const style = {
-    buttonGroup: {
-      display: 'flex',
-      justifyContent: 'space-between',
-    }
-  }
-
-  const menu = (
-    <Menu>
-      <MenuItem onClick={ props.handleModalOpen } text='Add New User' />
-      <MenuItem text='Delete User' />
-    </Menu>
-  );
-
-  const AddUserModal = (props) => {
-
-    const style = {
-      card: {
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '150px',
-      }
-    }
-
-    const ModalContainer = styled.div`
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    `;
-    const ModalTitle = styled.h1`
-
-      text-align: center;
-      font-size: 20px;
-
-    `;
-    const ButtonContainer = styled.div`
-      display: flex;
-      justify-content: space-between;
-    `;
-
-    return (
-      <Overlay
-        usePortal={ true }
-        autoFocus={ true }
-        enforceFocus={ true }
-        hasBackDrop={ true }
-        isOpen={ props.modalOpen }
-      >
-        <ModalContainer>
-          <Card style={ style.card }>
-            <ModalTitle>Add User</ModalTitle>
-            <InputGroup type='text' placeholder='User Name'/>
-            <ButtonContainer>
-              <Button text='Cancel' intent={ Intent.DANGER } small={ true } onClick={ props.handleModalOpen } />
-              <Button text='Add' intent={ Intent.SUCCESS } small={ true } />
-            </ButtonContainer>
-          </Card>
-        </ModalContainer>
-
-      </Overlay>
-    );
-  }
+  `;
 
   return (
-    <ButtonGroup style={ style.buttonGroup }>
-      <HTMLSelect options={['Select a User...', 'User One', 'User Two', 'User Three', ]} />
+    <Container>
 
-      <Popover content={ menu } position={ Position.LEFT }>
-        <Button minimal icon='cog' style={{ borderRadius: '50px', outline: 'none', }} />
-      </Popover>
-      <AddUserModal handleModalOpen={ props.handleModalOpen } modalOpen={ props.modalOpen } />
-    </ButtonGroup>
+    </Container>
   );
 }
 
@@ -99,9 +34,9 @@ const ExerciseTable = (props) => {
   const testData = [
     {
       id: '',
-      description: 'test-one',
-      duration: 'test-one',
-      date: 'test-one',
+      description: 'Push ups and situps and 2-mile run',
+      duration: '120 min(s)',
+      date: '02/11/2019',
     }, {
       id: '',
       description: 'test-one',
@@ -120,12 +55,36 @@ const ExerciseTable = (props) => {
     margin-top: 15px;
 
   `;
-
   const TableTitle = styled.h2`
 
     text-align: center;
     font-size: 24px;
     margin-bottom: 15px;
+
+
+
+  `;
+  const Number = styled.th`
+
+    width: 30px;
+
+  `;
+  const Description = styled.th`
+
+    width: 175px;
+
+  `;
+  const Duration = styled.th`
+
+    width: 94px;
+
+  `;
+  const Date = styled.th`
+
+    width: 80px;
+
+  `;
+  const Options = styled.th`
 
 
   `;
@@ -153,15 +112,15 @@ const ExerciseTable = (props) => {
 
   return (
     <TableContainer>
-      <TableTitle>User's Exercises</TableTitle>
-      <HTMLTable condensed={ true } bordered={ true } style={{ width: '100%' }}>
+      <TableTitle>{`${ props.user }'s Exercises`}</TableTitle>
+      <HTMLTable condensed={ true } bordered={ true }>
         <thead>
           <tr>
-            <th></th>
-            <th>Description</th>
-            <th>Duration</th>
-            <th>Date</th>
-            <th>Options</th>
+            <Number></Number>
+            <Description>Description</Description>
+            <Duration>Duration</Duration>
+            <Date>Date</Date>
+            <Options>Options</Options>
           </tr>
         </thead>
 
@@ -183,32 +142,48 @@ class App extends Component {
     super(props);
 
     this.state = {
-      modalOpen: false,
-    };
+      user: 'User',
+      users: [],
+    }
 
-    this.handleModalOpen = this.handleModalOpen.bind(this);
-
-  }
-
-  handleModalOpen() {
-    const modalOpen = !this.state.modalOpen;
-    this.setState({ modalOpen });
+    this.getUsers = this.getUsers.bind(this);
+    this.setUsers = this.setUsers.bind(this);
+    this.setUser = this.setUser.bind(this);
 
   }
+
+  getUsers() {
+    const url = 'http://localhost:8080/api/exercises/users';
+    axios.get(url).then(res => {
+           const users = res.data;
+           this.setState({ users })
+           console.log((users));
+         }).catch( err => {
+           console.log(err);
+         });
+  }
+
+  setUsers(users) {
+    this.setState({ users });
+  }
+  setUser(user) {
+    this.setState({ user });
+  }
+
+  componentDidMount() {
+    this.getUsers();
+  }
+
 
   render() {
     return (
       <AppContainer>
-        <Card style={{ width: '500px' }} elevation={ Elevation.TWO }>
+        <Card elevation={ Elevation.TWO } style={{ width: '530px' }}>
           <CardContainer>
-            <UserControls handleModalOpen={ this.handleModalOpen } modalOpen={ this.state.modalOpen } />
-            <ExerciseTable />
-
+            <UserControls setUser={ this.setUser } setUsers= { this.setUsers } users={ this.state.users } />
+            <ExerciseTable user={ this.state.user } />
           </CardContainer>
         </Card>
-
-
-
       </AppContainer>
     );
   }

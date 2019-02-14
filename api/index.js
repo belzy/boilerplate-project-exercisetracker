@@ -1,4 +1,4 @@
-const exerciseRouter = require('./exercise/index.js');
+const exerciseRouter = require('./exercises/index.js');
 const express = require('express');
 const router = express.Router();
 
